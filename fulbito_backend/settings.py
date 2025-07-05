@@ -1,18 +1,17 @@
 from pathlib import Path
 from decouple import config
+import dj_database_url
+import os
 
-# BASE_DIR = carpeta principal del proyecto
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECRET_KEY y DEBUG desde el archivo .env
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['*']  # Permitir todas las conexiones (para desarrollo)
+ALLOWED_HOSTS = ['*']
 
 # Aplicaciones instaladas
 INSTALLED_APPS = [
-    # Django por defecto
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,13 +24,12 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'corsheaders',
 
-    # Tu app
+    # App local
     'campeonato',
 ]
 
-# Middleware (orden importa)
 MIDDLEWARE = [
-    'corsheaders.middleware.CorsMiddleware',  # debe ir primero
+    'corsheaders.middleware.CorsMiddleware',  # debe ir antes de CommonMiddleware
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -43,7 +41,6 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'fulbito_backend.urls'
 
-# Plantillas
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -62,41 +59,32 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'fulbito_backend.wsgi.application'
 
-# Base de datos SQLite (puedes cambiar a PostgreSQL después)
+# Base de datos (usará PostgreSQL en producción y SQLite en desarrollo local)
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-# Configuración de Django REST Framework
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    'default': dj_database_url.config(
+        default=config('DATABASE_URL', default=f'sqlite:///{BASE_DIR / "db.sqlite3"}')
     )
 }
 
-# Permitir llamadas desde cualquier origen (CORS)
+# Autenticación con JWT
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+# CORS (permitir desde cualquier origen)
 CORS_ALLOW_ALL_ORIGINS = True
 
-# Zona horaria y configuración local
+# Internacionalización
 LANGUAGE_CODE = 'es-pe'
 TIME_ZONE = 'America/Lima'
-
 USE_I18N = True
 USE_TZ = True
 
 # Archivos estáticos
 STATIC_URL = 'static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-# ID automático para las tablas
+# Configuración por defecto de auto ID
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Agrega esto al final del archivo settings.py
-
-import os
-
-ALLOWED_HOSTS = ['*']
-
-CORS_ALLOW_ALL_ORIGINS = True  # Si estás usando django-cors-headers

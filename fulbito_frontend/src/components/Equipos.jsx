@@ -4,21 +4,26 @@ import axios from "axios"
 function Equipos() {
   const [equipos, setEquipos] = useState([])
   const [nombre, setNombre] = useState("")
-  const [grupo, setGrupo] = useState(1) // ID de grupo de ejemplo
-  const [torneo, setTorneo] = useState(1) // ID de torneo de ejemplo
+  const [grupo, setGrupo] = useState(1) // Puedes cargar dinámicamente si ya tienes endpoint
+  const [torneo, setTorneo] = useState(1) // Puedes cargar dinámicamente si ya tienes endpoint
 
   useEffect(() => {
-    axios.get("http://127.0.0.1:8000/api/equipos/")
+    axios.get(`${import.meta.env.VITE_API_URL}/api/equipos/`)
       .then(res => setEquipos(res.data))
+      .catch(err => console.error("Error al cargar equipos:", err))
   }, [])
 
   const crearEquipo = () => {
-    axios.post("http://127.0.0.1:8000/api/equipos/", {
-      nombre, grupo, torneo
-    }).then(res => {
+    axios.post(`${import.meta.env.VITE_API_URL}/api/equipos/`, {
+      nombre,
+      grupo,
+      torneo,
+    })
+    .then(res => {
       setEquipos([...equipos, res.data])
       setNombre("")
     })
+    .catch(err => console.error("Error al crear equipo:", err))
   }
 
   return (
@@ -34,7 +39,7 @@ function Equipos() {
       <button onClick={crearEquipo}>Crear</button>
 
       <ul>
-        {equipos.map(equipo => (
+        {equipos.map((equipo) => (
           <li key={equipo.id}>{equipo.nombre}</li>
         ))}
       </ul>
@@ -43,4 +48,5 @@ function Equipos() {
 }
 
 export default Equipos
+
 
